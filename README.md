@@ -2,7 +2,8 @@ Obtaining a sound-pressure-level (SPL) from non-calibration mics
 ================================================================
 This module is useful when you have a sensitive mic (e.g. the SANKEN), and the calibration (e.g. GRAS) microphone isn't sensitive enough to pick up your signal.
 
-*Warning* : While I suspect the SPL measurement written here works for any playback signal - for now it has only been tested with sweeps!
+*Warning 1* : While I suspect the SPL measurement written here works for any playback signal - for now it has only been tested with sweeps!
+*Warning 2* : This is not a 'clone-and-run' module. There are intentional error messages in between so the user can check if certain relevant steps need to be implemented.
 
 ## The substitution method
 Here we'll first use the 'substitution' method:
