@@ -39,16 +39,16 @@ from utilities import *
 
 #%%
 # Load the substitution-calibration audio (calibration and target mic)
-fs = sf.info('GRAS_playback_240819_0330.wav').samplerate
-gras_pbk_audio, fs = sf.read('GRAS_playback_240819_0330.wav',
+fs = sf.info('example_data/GRAS_playback_240819_0330.wav').samplerate
+gras_pbk_audio, fs = sf.read('example_data/GRAS_playback_240819_0330.wav',
                          start=int(fs*16.870), stop=int(fs*16.874))
-sennheiser_pbk_audio, fs = sf.read('SennheiserMKE_240819_0325.wav',
+sennheiser_pbk_audio, fs = sf.read('example_data/SennheiserMKE_240819_0325.wav',
                                start=int(fs*14.593),  stop=int(fs*14.597))
 sennheiser_pbk_audio = sennheiser_pbk_audio[:,0]
 gras_pbk_audio = gras_pbk_audio[:,0]
 
 # Load the 1 Pa reference tone 
-gras_1Pa_tone, fs = sf.read('GRAS_1Pa_240819_0331.wav', start=int(fs*0.5),
+gras_1Pa_tone, fs = sf.read('example_data/GRAS_1Pa_240819_0331.wav', start=int(fs*0.5),
                         stop=int(fs*1.5))
 gras_1Pa_tone = gras_1Pa_tone[:,0]
 
@@ -94,14 +94,16 @@ gras_centrefreqs, gras_freqrms = calc_native_freqwise_rms(gras_pbk_audio, fs)
 # Convert from RMS to Pascals (rms equivalent) since we know the GRAS sensitivity
 gras_freqParms = gras_freqrms/rms_1Pa_tone # now the levels of each freq band in Pa_rms
 plt.figure()
+
 a0 = plt.subplot(211)
 plt.plot(gras_centrefreqs, gras_freqParms)
 plt.ylabel('Pressure_rmseqv., Pa', fontsize=12)
+plt.title('GRAS mic recording of playback')
 plt.subplot(212, sharex=a0)
 plt.plot(gras_centrefreqs, pascal_to_dbspl(gras_freqParms))
 plt.xlabel('Frequencies, Hz', fontsize=12);
 plt.ylabel('Sound pressure level,\n dBrms SPL re 20$\mu$Pa', fontsize=12)
-plt.title('GRAS mic recording of playback')
+
 #%%
 # Target microphone. Here we'll cover the case where we only get an RMS/Pa
 # sensitivity. The other option is to calculate a mV/Pa sensitivity - which allows
@@ -109,11 +111,11 @@ plt.title('GRAS mic recording of playback')
 
 sennheiser_centrefreqs, sennheiser_freqrms = calc_native_freqwise_rms(sennheiser_pbk_audio, fs)
 plt.figure()
-plt.title('Sennheiser mic recording of playback')
+
 a0 = plt.subplot(211)
 plt.plot(sennheiser_centrefreqs, sennheiser_freqrms)
 plt.ylabel('Pressure_rmseqv., Pa', fontsize=12)
-
+plt.title('Sennheiser mic recording of playback')
 plt.subplot(212, sharex=a0)
 plt.plot(sennheiser_centrefreqs, dB(sennheiser_freqrms))
 plt.xlabel('Frequencies, Hz', fontsize=12);
@@ -129,6 +131,7 @@ plt.figure()
 a0 = plt.subplot(211)
 plt.plot(sennheiser_centrefreqs, sennheiser_sensitivity)
 plt.ylabel('a.u. RMS/Pa', fontsize=12)
+plt.title('Target mic sensitivity')
 plt.subplot(212, sharex=a0)
 plt.plot(sennheiser_centrefreqs, dB(sennheiser_sensitivity))
 plt.xlabel('Frequencies, Hz', fontsize=12);
@@ -139,19 +142,18 @@ plt.ylim(-60,-10)
 # We now have the target mic sensitivity - how do we use it to calculate the
 # actual dB SPL? 
 
-# Here we load a separate 'recorded sound' 
-recorded_sound, fs = sf.read('SennheiserMKE_240819_0325.wav',
+# Here we load a separate 'recorded sound' - a 'validation' audio clip let's call it 
+
+recorded_sound, fs = sf.read('example_data/SennheiserMKE_240819_0325.wav',
                              start=int(fs*15.002), stop=int(fs*15.01))
 recorded_sound = recorded_sound[:,0]
 recorded_sound *= db_to_linear(-sennheiser_gain)
 
-
-gras_rec, fs = sf.read('GRAS_playback_240819_0330.wav',
+# Also load the 'validation' calibration mic recording of the same sound
+gras_rec, fs = sf.read('example_data/GRAS_playback_240819_0330.wav',
                          start=int(fs*17.278), stop=int(fs*17.286))
 gras_rec = gras_rec[:,0]
 gras_rec *= db_to_linear(-gras_pbk_gain)
-
-
 
 #%% And finally let's check that the Sennheiser calibration makes sense
 # using a sound that we didn't use to calculate the sensitivity
@@ -170,8 +172,10 @@ gras_Pa = gras_freqrms/rms_1Pa_tone
 gras_dbspl = pascal_to_dbspl(gras_Pa)
 
 plt.figure()
-plt.plot(gras_dbspl, label='gras')
-plt.plot(freqwiese_dbspl, label='sennheiser')
+plt.plot(gras_centrefreqs,gras_dbspl, label='gras')
+plt.plot(recsound_centrefreqs,freqwiese_dbspl, label='sennheiser')
+plt.ylabel('dBrms SPL, re 20$\mu$Pa', fontsize=12)
+plt.xlabel('Frequency, Hz', fontsize=12)
 plt.legend()
 #%%
 # Now we know the sensitivity of the target mic - let's finally calculate
@@ -187,13 +191,15 @@ tgtmic_relevant_freqs = np.logical_and(recsound_centrefreqs>=frequency_band[0],
                                 recsound_centrefreqs<=frequency_band[1])
 total_rms_freqwise_Parms = np.sqrt(np.sum(freqwise_Parms[tgtmic_relevant_freqs]**2))
 
-# Ground truth GRAS mic audio of the same sound
+# Ground truth GRAS mic audio of the same sound. Here we use only the relevant 
+# frequency band of the recorded sweep
 gras_relevant_freqs = np.logical_and(gras_centrefreqs>=frequency_band[0],
                                 gras_centrefreqs<=frequency_band[1])
-# This is one way to do it - use the RAW audio, and calculate its rms
+
+#%% This is one way to do it - use the RAW audio, and calculate its rms
 # since we the overall flat sensitivity of the GRAS
 gras_overallaudio_Parms = rms(gras_rec)/rms_1Pa_tone
-# This is the other way to do it - like we did for the Sennheiser
+# This is the other way to do it by combining RMS values - like we did for the Sennheiser
 gras_totalrms_Parms = np.sqrt(np.sum(gras_Pa[gras_relevant_freqs]**2))
 
 print(f'GRAS dBrms SPL measures:{pascal_to_dbspl(gras_overallaudio_Parms)}, {pascal_to_dbspl(gras_totalrms_Parms)}')
