@@ -33,10 +33,11 @@ Created on Sat Apr 12 07:35:50 2025
 
 @author: theja
 """
-
+import os
 import numpy as np 
 import soundfile as sf
-import matplotlib.pyplot as plt 
+import matplotlib.pyplot as plt
+os.chdir(os.path.abspath(os.path.dirname(__file__))) 
 from utilities import *
 
 #%%
@@ -110,9 +111,11 @@ plt.figure()
 a0 = plt.subplot(211)
 plt.plot(gras_centrefreqs, gras_freqParms)
 plt.ylabel('Pressure_rmseqv., Pa', fontsize=12)
+plt.xlim(10e3, 96e3)
 plt.title('GRAS mic recording of playback')
 plt.subplot(212, sharex=a0)
 plt.plot(gras_centrefreqs, pascal_to_dbspl(gras_freqParms))
+plt.xlim(10e3, 96e3)
 plt.xlabel('Frequencies, Hz', fontsize=12)
 plt.ylabel('Sound pressure level,\n dBrms SPL re 20$\mu$Pa', fontsize=12)
 
@@ -128,10 +131,12 @@ a0 = plt.subplot(211)
 plt.plot(sennheiser_centrefreqs, sennheiser_freqrms)
 plt.ylabel('Pressure_rmseqv., Pa', fontsize=12)
 plt.title('Sanken mic recording of playback')
+plt.xlim(10e3, 96e3)
 plt.subplot(212, sharex=a0)
 plt.plot(sennheiser_centrefreqs, dB(sennheiser_freqrms))
 plt.xlabel('Frequencies, Hz', fontsize=12)
 plt.ylabel('dBrms a.u.', fontsize=12)
+plt.xlim(10e3, 96e3)
 
 
 #%%
@@ -144,11 +149,13 @@ a0 = plt.subplot(211)
 plt.plot(sennheiser_centrefreqs, sennheiser_sensitivity)
 plt.ylabel('a.u. RMS/Pa', fontsize=12)
 plt.title('Target mic sensitivity')
+plt.xlim(10e3, 96e3)
 plt.subplot(212, sharex=a0)
 plt.plot(sennheiser_centrefreqs, dB(sennheiser_sensitivity))
 plt.xlabel('Frequencies, Hz', fontsize=12)
 plt.ylabel('dB a.u. rms/Pa', fontsize=12)
 plt.ylim(-60,-10)
+plt.xlim(10e3, 96e3)
 
 #%% 
 # We now have the target mic sensitivity - how do we use it to calculate the
@@ -181,9 +188,10 @@ gras_dbspl = pascal_to_dbspl(gras_Pa)
 
 plt.figure()
 plt.plot(gras_centrefreqs,gras_dbspl, label='gras')
-plt.plot(recsound_centrefreqs,freqwiese_dbspl, label='sennheiser')
+plt.plot(recsound_centrefreqs,freqwiese_dbspl, label='sanken')
 plt.ylabel('dBrms SPL, re 20$\mu$Pa', fontsize=12)
 plt.xlabel('Frequency, Hz', fontsize=12)
+plt.xlim(10e3, 96e3)
 plt.legend()
 #%%
 # Now we know the sensitivity of the target mic - let's finally calculate
