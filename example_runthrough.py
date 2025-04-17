@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# %%
 """
 Example run-through
 ===================
@@ -32,6 +33,7 @@ Created on Sat Apr 12 07:35:50 2025
 
 @author: theja
 """
+
 import numpy as np 
 import soundfile as sf
 import matplotlib.pyplot as plt 
@@ -39,48 +41,58 @@ from utilities import *
 
 #%%
 # Load the substitution-calibration audio (calibration and target mic)
-fs = sf.info('example_data/GRAS_playback_240819_0330.wav').samplerate
-gras_pbk_audio, fs = sf.read('example_data/GRAS_playback_240819_0330.wav',
-                         start=int(fs*16.870), stop=int(fs*16.874))
-sennheiser_pbk_audio, fs = sf.read('example_data/SennheiserMKE_240819_0325.wav',
-                               start=int(fs*14.593),  stop=int(fs*14.597))
-sennheiser_pbk_audio = sennheiser_pbk_audio[:,0]
-gras_pbk_audio = gras_pbk_audio[:,0]
+
+fs = sf.info('data/calibration_tone.wav').samplerate
+print(fs)
+gras_pbk_audio = sf.read('data/gradeg_1.wav')[0]
+sennheiser_pbk_audio = sf.read('data/000deg_1.wav')[0]
+
 
 # Load the 1 Pa reference tone 
-gras_1Pa_tone, fs = sf.read('example_data/GRAS_1Pa_240819_0331.wav', start=int(fs*0.5),
-                        stop=int(fs*1.5))
-gras_1Pa_tone = gras_1Pa_tone[:,0]
+gras_1Pa_tone = sf.read('data/calibration_tone.wav', start=int(fs*0.5),
+                        stop=int(fs*1.5))[0]
 
 # Gain compensate the audio (e.g. un-gain them all) to bring them to the 'same' 
 # baseline level - not relevant for Ro-BAT
-gras_pbk_gain = 56 # dB
-gras_tone_gain = 36 
-sennheiser_gain = 36 
+gras_pbk_gain = 30 # dB
+gras_tone_gain = 30 
+sennheiser_gain = 29.5 
 
 gras_1Pa_tone *= db_to_linear(-gras_tone_gain)
 gras_pbk_audio *= db_to_linear(-gras_pbk_gain)
 sennheiser_pbk_audio *= db_to_linear(-sennheiser_gain)
 
-#%%
-# Do any bandpass filtering/cleaning here
-raise NotImplementedError('Bandpass or audio cleaning steps not implemented')
+plt.figure()
+plt.subplot(311)
+plt.title('Calibration tone')
+plt.plot(np.linspace(0, len(gras_1Pa_tone)/fs, len(gras_1Pa_tone)), gras_1Pa_tone)
+plt.subplot(312)
+plt.title('Calibration mic recording')
+plt.plot(np.linspace(0, len(gras_pbk_audio)/fs, len(gras_pbk_audio)), gras_pbk_audio)
+plt.subplot(313)
+plt.title('Target mic recording')
+plt.plot(np.linspace(0, len(sennheiser_pbk_audio)/fs, len(sennheiser_pbk_audio)), sennheiser_pbk_audio)
+plt.tight_layout()
 
-#%%
-# REMEMBER TO SEGMENT playback signal from calibration and target mic HERE -- THIS IS NOTT IMPLEMENTED!
-raise NotImplementedError('Remember to segment your sound here - you should have ideally nothing else but your playback sound')
+# #%%
+# # Do any bandpass filtering/cleaning here
+# raise NotImplementedError('Bandpass or audio cleaning steps not implemented')
 
-#%%
-# REMEMBER TO MATCH-FILTER (NOT IMPLEMENTED HERE) and extract only the direct path
-raise NotImplementedError('Matched filtering not implemented here - implement please')
+# #%%
+# # REMEMBER TO SEGMENT playback signal from calibration and target mic HERE -- THIS IS NOTT IMPLEMENTED!
+# raise NotImplementedError('Remember to segment your sound here - you should have ideally nothing else but your playback sound')
 
-#%%
-# Check the SNR at the spectral level - use a silent audio clip from the above recordings
-# to be sure that your measurements mean something useful. Remember garbage in, garbage out.
+# #%%
+# # REMEMBER TO MATCH-FILTER (NOT IMPLEMENTED HERE) and extract only the direct path
+# raise NotImplementedError('Matched filtering not implemented here - implement please')
 
-raise NotImplementedError('Check your SNR from the ambient sound!')
-# snr_target = dB(bandwise_tgtmic/tgt_silence_bandwise)
-# snr_gras = dB(bandwise_grasmic/gras_silence_bandwise)
+# #%%
+# # Check the SNR at the spectral level - use a silent audio clip from the above recordings
+# # to be sure that your measurements mean something useful. Remember garbage in, garbage out.
+
+# raise NotImplementedError('Check your SNR from the ambient sound!')
+# # snr_target = dB(bandwise_tgtmic/tgt_silence_bandwise)
+# # snr_gras = dB(bandwise_grasmic/gras_silence_bandwise)
 
 
 
@@ -101,7 +113,7 @@ plt.ylabel('Pressure_rmseqv., Pa', fontsize=12)
 plt.title('GRAS mic recording of playback')
 plt.subplot(212, sharex=a0)
 plt.plot(gras_centrefreqs, pascal_to_dbspl(gras_freqParms))
-plt.xlabel('Frequencies, Hz', fontsize=12);
+plt.xlabel('Frequencies, Hz', fontsize=12)
 plt.ylabel('Sound pressure level,\n dBrms SPL re 20$\mu$Pa', fontsize=12)
 
 #%%
@@ -115,10 +127,10 @@ plt.figure()
 a0 = plt.subplot(211)
 plt.plot(sennheiser_centrefreqs, sennheiser_freqrms)
 plt.ylabel('Pressure_rmseqv., Pa', fontsize=12)
-plt.title('Sennheiser mic recording of playback')
+plt.title('Sanken mic recording of playback')
 plt.subplot(212, sharex=a0)
 plt.plot(sennheiser_centrefreqs, dB(sennheiser_freqrms))
-plt.xlabel('Frequencies, Hz', fontsize=12);
+plt.xlabel('Frequencies, Hz', fontsize=12)
 plt.ylabel('dBrms a.u.', fontsize=12)
 
 
@@ -134,7 +146,7 @@ plt.ylabel('a.u. RMS/Pa', fontsize=12)
 plt.title('Target mic sensitivity')
 plt.subplot(212, sharex=a0)
 plt.plot(sennheiser_centrefreqs, dB(sennheiser_sensitivity))
-plt.xlabel('Frequencies, Hz', fontsize=12);
+plt.xlabel('Frequencies, Hz', fontsize=12)
 plt.ylabel('dB a.u. rms/Pa', fontsize=12)
 plt.ylim(-60,-10)
 
@@ -144,15 +156,11 @@ plt.ylim(-60,-10)
 
 # Here we load a separate 'recorded sound' - a 'validation' audio clip let's call it 
 
-recorded_sound, fs = sf.read('example_data/SennheiserMKE_240819_0325.wav',
-                             start=int(fs*15.002), stop=int(fs*15.01))
-recorded_sound = recorded_sound[:,0]
+recorded_sound, fs = sf.read('data/000deg_2.wav')
 recorded_sound *= db_to_linear(-sennheiser_gain)
 
 # Also load the 'validation' calibration mic recording of the same sound
-gras_rec, fs = sf.read('example_data/GRAS_playback_240819_0330.wav',
-                         start=int(fs*17.278), stop=int(fs*17.286))
-gras_rec = gras_rec[:,0]
+gras_rec, fs = sf.read('data/gradeg_2.wav')
 gras_rec *= db_to_linear(-gras_pbk_gain)
 
 #%% And finally let's check that the Sennheiser calibration makes sense
@@ -183,7 +191,7 @@ plt.legend()
 # We rely on combining the Pa rms of all relevant frequencies 
 # e.g. see https://electronics.stackexchange.com/questions/642109/summing-rms-values-proof
 
-frequency_band = [0.2e3, 15e3] # min, max frequency to do the compensation Hz
+frequency_band = [15e3, 95e3] # min, max frequency to do the compensation Hz
 
 # Choose to calculate the dB SPL only for the frequency range of interest.
 # Target mic
