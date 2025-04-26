@@ -5,7 +5,7 @@ Example run-through
 This IS NOT a complete run-through. The follow things need to implemented by the user
     * playback signal segmentation 
     * bandpass filtering / other cleaning
-    * matched-filtering to remove reflections
+    * deconvolution to remove reflections
 
 Other things to remember
 ------------------------
@@ -36,6 +36,9 @@ import numpy as np
 import soundfile as sf
 import matplotlib.pyplot as plt 
 from utilities import *
+
+#%% 
+raise NotImplementedError('Still under construction...')
 
 #%%
 # Load the substitution-calibration audio (calibration and target mic)
@@ -73,6 +76,13 @@ raise NotImplementedError('Remember to segment your sound here - you should have
 #%%
 # REMEMBER TO MATCH-FILTER (NOT IMPLEMENTED HERE) and extract only the direct path
 raise NotImplementedError('Deconvolution not implemented here - implement please')
+
+#%%
+fs = sf.info('example_data/playback_sweep.wav').samplerate
+origsweep, fs = sf.read('example_data/playback_sweep.wav', start=int(fs*0.1),
+                        stop=int(fs*(0.1 + 7e-3)))
+
+
 
 #%%
 # Check the SNR at the spectral level - use a silent audio clip from the above recordings
