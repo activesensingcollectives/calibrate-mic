@@ -57,7 +57,7 @@ gras_1Pa_tone = sf.read('data/calibration_tone.wav', start=int(fs*0.5),
 # baseline level - not relevant for Ro-BAT
 gras_pbk_gain = 30 # dB
 gras_tone_gain = 30 
-sennheiser_gain = 29.5 
+sennheiser_gain = 30
 
 gras_1Pa_tone *= db_to_linear(-gras_tone_gain)
 gras_pbk_audio *= db_to_linear(-gras_pbk_gain)
@@ -75,6 +75,15 @@ plt.title('Target mic recording')
 plt.plot(np.linspace(0, len(sennheiser_pbk_audio)/fs, len(sennheiser_pbk_audio)), sennheiser_pbk_audio)
 plt.tight_layout()
 
+# %%
+plt.figure()
+plt.subplot(211)
+plt.title('Calibration mic recording')
+plt.specgram(gras_pbk_audio, Fs=fs, NFFT=128, noverlap=64)
+plt.subplot(212)
+plt.title('Target mic recording')
+plt.specgram(sennheiser_pbk_audio, Fs=fs, NFFT=128, noverlap=64)
+plt.tight_layout() 
 # #%%
 # # Do any bandpass filtering/cleaning here
 # raise NotImplementedError('Bandpass or audio cleaning steps not implemented')
@@ -117,7 +126,7 @@ plt.subplot(212, sharex=a0)
 plt.plot(gras_centrefreqs, pascal_to_dbspl(gras_freqParms))
 plt.xlim(10e3, 96e3)
 plt.xlabel('Frequencies, Hz', fontsize=12)
-plt.ylabel('Sound pressure level,\n dBrms SPL re 20$\mu$Pa', fontsize=12)
+plt.ylabel('Sound pressure level,\n dBrms SPL re 20$\\mu $Pa', fontsize=12);
 
 #%%
 # Target microphone. Here we'll cover the case where we only get an RMS/Pa
@@ -136,7 +145,7 @@ plt.subplot(212, sharex=a0)
 plt.plot(sennheiser_centrefreqs, dB(sennheiser_freqrms))
 plt.xlabel('Frequencies, Hz', fontsize=12)
 plt.ylabel('dBrms a.u.', fontsize=12)
-plt.xlim(10e3, 96e3)
+plt.xlim(10e3, 96e3);
 
 
 #%%
@@ -150,12 +159,13 @@ plt.plot(sennheiser_centrefreqs, sennheiser_sensitivity)
 plt.ylabel('a.u. RMS/Pa', fontsize=12)
 plt.title('Target mic sensitivity')
 plt.xlim(10e3, 96e3)
+plt.ylim(0, 0.1)
 plt.subplot(212, sharex=a0)
 plt.plot(sennheiser_centrefreqs, dB(sennheiser_sensitivity))
 plt.xlabel('Frequencies, Hz', fontsize=12)
 plt.ylabel('dB a.u. rms/Pa', fontsize=12)
 plt.ylim(-60,-10)
-plt.xlim(10e3, 96e3)
+plt.xlim(10e3, 96e3);
 
 #%% 
 # We now have the target mic sensitivity - how do we use it to calculate the
@@ -189,10 +199,10 @@ gras_dbspl = pascal_to_dbspl(gras_Pa)
 plt.figure()
 plt.plot(gras_centrefreqs,gras_dbspl, label='gras')
 plt.plot(recsound_centrefreqs,freqwiese_dbspl, label='sanken')
-plt.ylabel('dBrms SPL, re 20$\mu$Pa', fontsize=12)
+plt.ylabel('dBrms SPL, re 20$\\mu$Pa', fontsize=12)
 plt.xlabel('Frequency, Hz', fontsize=12)
 plt.xlim(10e3, 96e3)
-plt.legend()
+plt.legend();
 #%%
 # Now we know the sensitivity of the target mic - let's finally calculate
 # the dB SPL of the recorded sound!
