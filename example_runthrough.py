@@ -43,21 +43,21 @@ from utilities import *
 #%%
 # Load the substitution-calibration audio (calibration and target mic)
 
-fs = sf.info('data/calibration_tone.wav').samplerate
+fs = sf.info('calibration/calibration_tone.wav').samplerate
 print(fs)
-gras_pbk_audio = sf.read('data/gradeg_1.wav')[0]
-sennheiser_pbk_audio = sf.read('data/000deg_1.wav')[0]
+gras_pbk_audio = sf.read('calibration/gras1/0_gras_recording.wav')[0]
+sennheiser_pbk_audio = sf.read('calibration/mic_1/0_20250526_19-46-54.wav')[0]
 
 
 # Load the 1 Pa reference tone 
-gras_1Pa_tone = sf.read('data/calibration_tone.wav', start=int(fs*0.5),
+gras_1Pa_tone = sf.read('calibration/calibration_tone.wav', start=int(fs*0.5),
                         stop=int(fs*1.5))[0]
 
 # Gain compensate the audio (e.g. un-gain them all) to bring them to the 'same' 
 # baseline level - not relevant for Ro-BAT
 gras_pbk_gain = 30 # dB
 gras_tone_gain = 30 
-sennheiser_gain = 30
+sennheiser_gain = 0
 
 gras_1Pa_tone *= db_to_linear(-gras_tone_gain)
 gras_pbk_audio *= db_to_linear(-gras_pbk_gain)
@@ -159,12 +159,12 @@ plt.plot(sennheiser_centrefreqs, sennheiser_sensitivity)
 plt.ylabel('a.u. RMS/Pa', fontsize=12)
 plt.title('Target mic sensitivity')
 plt.xlim(10e3, 96e3)
-plt.ylim(0, 0.1)
+# plt.ylim(0, 0.1)
 plt.subplot(212, sharex=a0)
 plt.plot(sennheiser_centrefreqs, dB(sennheiser_sensitivity))
 plt.xlabel('Frequencies, Hz', fontsize=12)
 plt.ylabel('dB a.u. rms/Pa', fontsize=12)
-plt.ylim(-60,-10)
+# plt.ylim(-60,-10)
 plt.xlim(10e3, 96e3);
 
 #%% 
@@ -173,11 +173,11 @@ plt.xlim(10e3, 96e3);
 
 # Here we load a separate 'recorded sound' - a 'validation' audio clip let's call it 
 
-recorded_sound, fs = sf.read('data/000deg_2.wav')
+recorded_sound, fs = sf.read('calibration/mic_1/1_20250526_19-46-54.wav')
 recorded_sound *= db_to_linear(-sennheiser_gain)
 
 # Also load the 'validation' calibration mic recording of the same sound
-gras_rec, fs = sf.read('data/gradeg_2.wav')
+gras_rec, fs = sf.read('calibration/gras1/1_gras_recording.wav')
 gras_rec *= db_to_linear(-gras_pbk_gain)
 
 #%% And finally let's check that the Sennheiser calibration makes sense
